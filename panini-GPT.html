@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acquista Panini</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Supermercado+One&display=swap" rel="stylesheet">
+<style>
+
+body  {
+    background-color: rgb(56, 15, 15);
+    }
+
+.card img {
+
+    width: 285px;
+    height: 200px;
+}
+h1 {
+    color: rgb(182, 162, 162); 
+}
+h2 {
+    color: rgb(255, 255, 255); 
+}
+p {
+    background-color: lightgray;
+}
+
+button {
+    width: 100px;
+    height: 30px;
+    border-radius: 5px;
+}
+
+p.card-text {
+    border: 1px solid black;
+    border-radius: 5px;
+}
+
+p.p-order {
+    border: 1px solid black;
+    border-radius: 5px;
+}
+
+p.info {
+    border: 1px solid black;
+    border-radius: 5px;
+}
+
+.btn {
+  
+  display: inline-flex;
+  justify-content: center;
+
+}
+
+.btn-success {
+    background-color: green;
+}
+
+.btn-danger {
+    color: black;
+    background-color: yellow;
+}
+
+
+.supermercado-one-regular {
+  font-family: "Supermercado One", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+#ordini {
+    background-color: rgb(76, 67, 88);
+    width: 200px;
+}
+
+#menu{
+    width: 300px;
+    border: 5px solid black;
+    border-radius: 10px;
+    background-color: rgb(58, 3, 3);
+}
+
+</style>
+
+</head>
+<script>
+class Carrello {
+    constructor() {
+        this.items = new Map(); // id -> { panino, quantità }
+    }
+
+    add(panino) {
+        const item = this.items.get(panino.id) || { panino, quantità: 0 };
+        item.quantità++;
+        this.items.set(panino.id, item);
+    }
+
+    remove(panino) {
+        const item = this.items.get(panino.id);
+        if (!item) return;
+
+        item.quantità--;
+
+        if (item.quantità <= 0) {
+            this.items.delete(panino.id);
+        }
+    }
+
+    getTotale() {
+        let tot = 0;
+        this.items.forEach(item => {
+            tot += item.quantità * item.panino.prezzo;
+        });
+        return tot;
+    }
+
+    getItems() {
+        return Array.from(this.items.values());
+    }
+}
+
+class Panino {
+    constructor(id, nome, descrizione, prezzo, img, carrello) {
+        this.id = id;
+        this.nome = nome;
+        this.descrizione = descrizione;
+        this.prezzo = prezzo;
+        this.img = img;
+        this.carrello = carrello;
+
+        this.pezzi = 0;
+
+        this.element = this.createElement();
+        this.bindEvents();
+        this.updateUI();
+    }
+
+    createElement() {
+        const div = document.createElement("div");
+
+        div.innerHTML = `
+            <div class="card mx-auto mb-3" style="width: 18rem;">
+                <img class="card-img-top" src="${this.img}" alt="${this.nome}">
+                <div class="card-body">
+                    <h5 class="card-title">${this.nome}</h5>
+                    <p class="card-text">${this.descrizione}</p>
+                    <p class="info" id="info-${this.id}"></p>
+                    <button id="add-${this.id}" class="btn btn-success btn-sm">Aggiungi</button>
+                    <button id="sub-${this.id}" class="btn btn-danger btn-sm">Sottrai</button>
+                </div>
+            </div>
+        `;
+
+        return div;
+    }
+
+    bindEvents() {
+        this.element.querySelector(`#add-${this.id}`)
+            .addEventListener("click", () => this.incrementa());
+
+        this.element.querySelector(`#sub-${this.id}`)
+            .addEventListener("click", () => this.decrementa());
+    }
+
+    incrementa() {
+        this.pezzi++;
+        this.carrello.add(this);
+        this.updateUI();
+    }
+
+    decrementa() {
+        if (this.pezzi <= 0) return;
+
+        this.pezzi--;
+        this.carrello.remove(this);
+        this.updateUI();
+    }
+
+    updateUI() {
+        const totale = this.pezzi * this.prezzo;
+
+        this.element.querySelector(`#info-${this.id}`).textContent = `Prezzo: ${this.prezzo}€, Pezzi: ${this.pezzi}, Totale: ${totale}€`;
+    }
+
+    getElement() {
+        return this.element;
+    }
+}
+
+
+// INIT
+document.addEventListener("DOMContentLoaded", () => {
+
+    const carrello = new Carrello();
+    const container = document.getElementById("result0");
+
+    const panini = [
+        new Panino(0, "Hamburger", "Hamburger, insalata, pomodori e formaggio", 10, "img/hamburger.jpg", carrello),
+        new Panino(1, "Chicken", "Pollo e formaggio", 9, "img/chiken.jpg", carrello),
+        new Panino(2, "Vegetariano", "Mozzarella e pomodori", 7, "img/mozzarella.jpg", carrello),
+        new Panino(3, "Salsiccia", "Salsiccia", 8, "img/salsiccia.jpg", carrello)
+    ];
+
+    panini.forEach(p => container.appendChild(p.getElement()));
+
+    document.getElementById("btnOrder").addEventListener("click", () => {
+        const divOrdini = document.getElementById("ordini");
+        const menu = document.getElementById("menu");
+
+        divOrdini.innerHTML = "";
+
+        const items = carrello.getItems();
+
+        if (items.length === 0) {
+            divOrdini.textContent = "Nessun ordine";
+            return;
+        }
+
+        items.forEach(item => {
+            const p = document.createElement("p");
+            p.className = "p-order"
+            p.textContent = `${item.panino.nome} x ${item.quantità} = ${item.quantità * item.panino.prezzo}€`;
+            divOrdini.appendChild(p);
+        });
+
+        const totale = document.createElement("p");
+        totale.style.fontWeight = "bold";
+        totale.textContent = `Totale: ${carrello.getTotale()}€`;
+
+        divOrdini.appendChild(totale);
+
+        menu.style.display = "block";
+        menu.scrollIntoView({ behavior: "smooth" });
+    });
+
+});
+</script>
+
+
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+   <div style="text-align: center;">
+   <h1>Paninoteca<h1><br>
+   <h2 class="supermercado-one-regular">La Buona</h2> <br>
+     <div id = "result0"></div>
+  </div>
+<hr>
+   <div style="text-align: center;">
+     <button id="btnOrder" type="button">Ordina</button><br><hr>
+     <div id="menu" class="supermercado-one-regular mx-auto">
+        <p style="font-weight: bold; font-size: 35px;">Menu</p>
+        <div id="ordini" class="mx-auto"></div>
+    </div>
+   </div>
+</body>
+</html>
