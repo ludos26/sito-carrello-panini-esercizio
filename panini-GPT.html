@@ -57,15 +57,24 @@ p.info {
 
 }
 
-.btn-success {
+.my-btn-add {
     background-color: green;
+    color: white;
 }
 
-.btn-danger {
+.my-btn-remove {
+    background-color: rgb(202, 137, 15);
     color: black;
-    background-color: yellow;
 }
 
+.my-btn-add:hover {
+    background-color: rgb(25, 78, 25);
+    color: white;
+}
+
+.my-btn-remove:hover {
+    background-color: orangered;
+}
 
 .supermercado-one-regular {
   font-family: "Supermercado One", sans-serif;
@@ -150,8 +159,8 @@ class Panino {
                     <h5 class="card-title">${this.nome}</h5>
                     <p class="card-text">${this.descrizione}</p>
                     <p class="info" id="info-${this.id}"></p>
-                    <button id="add-${this.id}" class="btn btn-success btn-sm">Aggiungi</button>
-                    <button id="sub-${this.id}" class="btn btn-danger btn-sm">Sottrai</button>
+                    <button id="add-${this.id}" class="btn my-btn-add btn-sm">Aggiungi</button>
+                    <button id="sub-${this.id}" class="btn my-btn-remove btn-sm">Sottrai</button>
                 </div>
             </div>
         `;
